@@ -9,6 +9,7 @@ RUN rm -rf /var/lib/apt/lists/* && apt clean && apt update && apt install -y \
 RUN echo "ExitNodes {RU}" >> /etc/tor/torrc
 
 RUN pip3 install -U --no-cache-dir PySocks
+RUN pip3 install -U --no-cache-dir requests
 #requests[socks]
 
 ENV ALLEGIANCEDIR ./allegiance

