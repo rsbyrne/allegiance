@@ -1,6 +1,6 @@
 #!/bin/bash
 MOUNTFROM=$PWD/logs
-MOUNTTO='/home/morpheus/workspace/mount/logs'
+MOUNTTO='/allegiance/logs'
 IMAGE='rsbyrne/allegiance'
 SOCK='/var/run/docker.sock'
 mkdir logs -p
