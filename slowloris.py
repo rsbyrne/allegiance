@@ -308,6 +308,9 @@ if __name__ == '__main__':
         threads = args.__dict__.pop('threads')
         CyclingSlowloris(**vars(args)).multi(threads)
 
+    else:
+        raise ValueError(which)
+
 
 ###############################################################################
 ###############################################################################
